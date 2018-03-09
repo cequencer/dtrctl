@@ -5,7 +5,6 @@ A tool that can do different kinds of operations to a Docker Trusted Registry. S
 - Pulling a DTR's org, repo, and team structure locally to inspect
 - Syncing org, repo, team, and repo access rights from a source DTR to a destination DTR
 - Syncing images from a source DTR to a destination DTR
-- Printing out a map of a DTR's team to repo memberships
 
 ### Usage
 ```
@@ -20,7 +19,8 @@ Options
 -s, --source-metadata  Pull org, repo, team, and team access metadata from source DTR and store locally
 -p, --push-metadata    Push org, repo, team, and team access metadata from local source to dest DTR
 -i, --image-sync       Pull images from source DTR and push to dest DTR
--a, --print-access     Print mapping of access rights between teams and repos
+-c, --compare          Compare images from the source DTR and the dest DTR
+-e, --everything       Run everything expect for compare
 --help                 Print usage
 ```
 
@@ -31,7 +31,8 @@ Options
 SRC_DTR_URL=
 SRC_DTR_USER=
 SRC_DTR_PASSWORD=
-SRC_NO_OF_REPOS=1000 #Default value
+SRC_NO_OF_ACCOUNTS=1000 #Default is 10
+SRC_NO_OF_REPOS=1000 #Default is 10
 
 ## PARAMETERS to reach the DESTINATION DTR
 DEST_DTR_URL=
@@ -53,8 +54,9 @@ docker run --rm -it \
 -v /var/run/docker.sock:/var/run/docker.sock \
 -v /etc/docker:/etc/docker \
 -v ~/dtrsync:/dtrsync \
+-v ~/.docker/config.json:/.docker/config.json \
 --env-file conf.env \
-chrch/dtrctl -s 
+casaler/dtrctl -s 
 ```
 
 The following volumes are required so that Docker can function inside the contianer.
@@ -107,8 +109,9 @@ docker run --rm -it \
 -v /var/run/docker.sock:/var/run/docker.sock \
 -v /etc/docker:/etc/docker \
 -v ~/dtrsync:/dtrsync \
+-v ~/.docker/config.json:/.docker/config.json \
 --env-file conf.env \
-chrch/dtrctl -p
+casaler/dtrctl -p
 ```
 
 ### Sync org metadata and images from a source DTR to a destination DTR
@@ -118,24 +121,54 @@ docker run --rm -it \
 -v /var/run/docker.sock:/var/run/docker.sock \
 -v /etc/docker:/etc/docker \
 -v ~/dtrsync:/dtrsync \
+-v ~/.docker/config.json:/.docker/config.json \
 --env-file conf.env \
-chrch/dtrctl -i
+casaler/dtrctl -i
+```
+
+
+### Run all three of the above commands (s, p, i)
+
+```
+docker run --rm -it \
+-v /var/run/docker.sock:/var/run/docker.sock \
+-v /etc/docker:/etc/docker \
+-v ~/dtrsync:/dtrsync \
+-v ~/.docker/config.json:/.docker/config.json \
+--env-file conf.env \
+casaler/dtrctl -e
+```
+
+
+### Delta of the source DTR to the destination DTR
+
+```
+docker run --rm -it \
+-v /var/run/docker.sock:/var/run/docker.sock \
+-v /etc/docker:/etc/docker \
+-v ~/dtrsync:/dtrsync \
+-v ~/.docker/config.json:/.docker/config.json \
+--env-file conf.env \
+casaler/dtrctl -c
 ```
 
 
 ### Develop dtrctl locally
 ```
-$ git clone https://github.com/mark-church/dtrctl.git
+$ git clone https://github.com/Gearheads/dtrctl.git
 
 $ cd ~/dtrctl
+
+$ docker build -t casaler/dtrctl .
 
 $ docker run --rm -it \
 -v /var/run/docker.sock:/var/run/docker.sock \
 -v /etc/docker:/etc/docker \
 -v ~/dtrsync:/dtrsync \
+-v ~/.docker/config.json:/.docker/config.json \
 --env-file conf.env \
 -v ~/dtrctl:/dtrctl \
-chrch/dtrctl
+casaler/dtrctl
 ```
 
 
